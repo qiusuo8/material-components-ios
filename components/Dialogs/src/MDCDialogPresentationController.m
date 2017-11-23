@@ -63,8 +63,12 @@ static UIEdgeInsets MDCDialogEdgeInsets = {24, 20, 24, 20};
     _dismissGestureRecognizer =
         [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismiss:)];
     [_dimmingView addGestureRecognizer:_dismissGestureRecognizer];
-
+    _dismissGestureRecognizer.enabled = NO;
+      
     _trackingView = [[MDCDialogShadowedView alloc] init];
+
+    self.presentedView.layer.cornerRadius = 2.0;
+    self.presentedView.clipsToBounds = YES;
 
     [self registerKeyboardNotifications];
   }
