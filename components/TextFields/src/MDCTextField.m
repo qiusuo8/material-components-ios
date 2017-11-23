@@ -59,6 +59,8 @@ static const CGFloat MDCTextInputEditingRectRightViewPaddingCorrection = -2.f;
 @implementation MDCTextField
 
 @dynamic borderStyle;
+@synthesize placeholderOfSuper = _placeholderOfSuper;
+@synthesize attributedPlaceholderOfSuper = _attributedPlaceholderOfSuper;
 
 - (instancetype)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
@@ -150,6 +152,10 @@ static const CGFloat MDCTextInputEditingRectRightViewPaddingCorrection = -2.f;
                     selector:@selector(textFieldDidChange:)
                         name:UITextFieldTextDidChangeNotification
                       object:self];
+  [defaultCenter addObserver:self
+                      selector:@selector(textFieldDidEndEditing:)
+                          name:UITextFieldTextDidEndEditingNotification
+                        object:self];
 
   [self setContentCompressionResistancePriority:UILayoutPriorityDefaultHigh + 1
                                         forAxis:UILayoutConstraintAxisVertical];
@@ -363,7 +369,6 @@ static const CGFloat MDCTextInputEditingRectRightViewPaddingCorrection = -2.f;
 }
 
 - (void)setAttributedPlaceholder:(NSAttributedString *)attributedPlaceholder {
-  [super setAttributedPlaceholder:attributedPlaceholder];
   _fundament.attributedPlaceholder = attributedPlaceholder;
 }
 
@@ -431,7 +436,6 @@ static const CGFloat MDCTextInputEditingRectRightViewPaddingCorrection = -2.f;
 }
 
 - (void)setPlaceholder:(NSString *)placeholder {
-  [super setPlaceholder:placeholder];
   [self.fundament setPlaceholder:placeholder];
 }
 
@@ -593,11 +597,11 @@ static const CGFloat MDCTextInputEditingRectRightViewPaddingCorrection = -2.f;
 
 #pragma mark - UITextField Draw Overrides
 
-- (void)drawPlaceholderInRect:(__unused CGRect)rect {
-  // We implement our own placeholder that is managed by the fundament. However, to observe normal
-  // VO placeholder behavior, we still set the placeholder on the UITextField, and need to not draw
-  // it here.
-}
+//- (void)drawPlaceholderInRect:(__unused CGRect)rect {
+//  // We implement our own placeholder that is managed by the fundament. However, to observe normal
+//  // VO placeholder behavior, we still set the placeholder on the UITextField, and need to not draw
+//  // it here.
+//}
 
 #pragma mark - Layout (Custom)
 
@@ -659,6 +663,8 @@ static const CGFloat MDCTextInputEditingRectRightViewPaddingCorrection = -2.f;
 #pragma mark - UITextField Notification Observation
 
 - (void)textFieldDidBeginEditing:(__unused NSNotification *)note {
+    [super setPlaceholder:self.placeholderOfSuper];
+    [super setAttributedPlaceholder:self.attributedPlaceholderOfSuper];
   [_fundament didBeginEditing];
 }
 
@@ -668,6 +674,8 @@ static const CGFloat MDCTextInputEditingRectRightViewPaddingCorrection = -2.f;
 
 - (void)textFieldDidEndEditing:(__unused NSNotification *)note {
   [_fundament didEndEditing];
+    [super setPlaceholder:nil];
+    [super setAttributedPlaceholder:nil];
 }
 
 #pragma mark - RTL

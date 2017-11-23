@@ -42,4 +42,14 @@ extern NSString *_Nonnull const MDCTextFieldTextDidSetTextNotification;
  */
 @property(nonatomic, assign) UITextFieldViewMode leadingViewMode;
 
+/**
+ The attributed text string of the super's attributedPlaceholder.
+ */
+@property(nonatomic, nullable, copy) NSAttributedString *attributedPlaceholderOfSuper;
+
+/**
+ The text string of the super's placeholder.
+ */
+@property(nonatomic, nullable, copy) NSString *placeholderOfSuper;
+
 @end
