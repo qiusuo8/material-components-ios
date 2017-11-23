@@ -77,8 +77,8 @@ static const CGFloat MDCDialogMessageOpacity = 0.54f;
 @property(nonatomic, strong) UIScrollView *contentScrollView;
 @property(nonatomic, strong) UIScrollView *actionsScrollView;
 
-@property(nonatomic, strong) UILabel *titleLabel;
-@property(nonatomic, strong) UILabel *messageLabel;
+@property(nonatomic, strong, readwrite) UILabel *titleLabel;
+@property(nonatomic, strong, readwrite) UILabel *messageLabel;
 
 @property(nonatomic, getter=isVerticalActionsLayout) BOOL verticalActionsLayout;
 
@@ -167,6 +167,35 @@ static const CGFloat MDCDialogMessageOpacity = 0.54f;
   [self.view setNeedsLayout];
 }
 
+- (UILabel *)titleLabel {
+  if (_titleLabel == nil) {
+    _titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    _titleLabel.numberOfLines = 0;
+    _titleLabel.textAlignment = NSTextAlignmentNatural;
+    if (self.mdc_adjustsFontForContentSizeCategory) {
+        _titleLabel.font = [UIFont mdc_preferredFontForMaterialTextStyle:MDCFontTextStyleTitle];
+    } else {
+        _titleLabel.font = [MDCTypography titleFont];
+    }
+  }
+  return _titleLabel;
+}
+
+- (UILabel *)messageLabel {
+  if (_messageLabel == nil) {
+    _messageLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    _messageLabel.numberOfLines = 0;
+    _messageLabel.textAlignment = NSTextAlignmentNatural;
+    if (self.mdc_adjustsFontForContentSizeCategory) {
+        _messageLabel.font = [UIFont mdc_preferredFontForMaterialTextStyle:MDCFontTextStyleBody1];
+    } else {
+        _messageLabel.font = [MDCTypography body1Font];
+    }
+    self.messageLabel.textColor = [UIColor colorWithWhite:0.0 alpha:MDCDialogMessageOpacity];
+  }
+  return _messageLabel;
+}
+
 - (NSArray<MDCAlertAction *> *)actions {
   return [_actions copy];
 }
@@ -176,9 +205,21 @@ static const CGFloat MDCDialogMessageOpacity = 0.54f;
 
   MDCFlatButton *actionButton = [[MDCFlatButton alloc] initWithFrame:CGRectZero];
   actionButton.mdc_adjustsFontForContentSizeCategory = self.mdc_adjustsFontForContentSizeCategory;
-  [actionButton setTitle:action.title forState:UIControlStateNormal];
+//  [actionButton setTitle:action.title forState:UIControlStateNormal];
   // TODO(#1726): Determine default text color values for Normal and Disabled
+  if (self.attrsForNormal) {
+    [actionButton setAttributedTitle:[[NSAttributedString alloc] initWithString:action.title attributes:self.attrsForNormal] forState:UIControlStateNormal];
+  } else {
+    [actionButton setTitle:action.title forState:UIControlStateNormal];
+  }
+  if (self.attrsForDisable) {
+    [actionButton setAttributedTitle:[[NSAttributedString alloc] initWithString:action.title attributes:self.attrsForDisable] forState:UIControlStateDisabled];
+  } else {
+    [actionButton setTitle:action.title forState:UIControlStateDisabled];
+  }
   CGRect buttonRect = actionButton.bounds;
+//  buttonRect.size.width += MDCButtonDefaultContentEdgeInsets.left + MDCButtonDefaultContentEdgeInsets.right;
+//  buttonRect.size.height += MDCButtonDefaultContentEdgeInsets.top + MDCButtonDefaultContentEdgeInsets.bottom;
   buttonRect.size.height = MAX(buttonRect.size.height, MDCDialogActionButtonHeight);
   buttonRect.size.width = MAX(buttonRect.size.width, MDCDialogActionButtonMinimumWidth);
   actionButton.frame = buttonRect;
@@ -241,11 +282,11 @@ static const CGFloat MDCDialogMessageOpacity = 0.54f;
   NSInteger actionIndex = [self.actionButtons indexOfObject:sender];
   MDCAlertAction *action = self.actions[actionIndex];
 
-  if (action.completionHandler) {
-    action.completionHandler(action);
-  }
-
-  [self.presentingViewController dismissViewControllerAnimated:YES completion:NULL];
+  [self.presentingViewController dismissViewControllerAnimated:YES completion:^{
+    if (action.completionHandler) {
+        action.completionHandler(action);
+    }
+  }];
 }
 
 #pragma mark - UIViewController
@@ -263,25 +304,8 @@ static const CGFloat MDCDialogMessageOpacity = 0.54f;
   self.actionsScrollView.backgroundColor = [UIColor whiteColor];
   [self.view addSubview:self.actionsScrollView];
 
-  self.titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-  self.titleLabel.numberOfLines = 0;
-  self.titleLabel.textAlignment = NSTextAlignmentNatural;
-  if (self.mdc_adjustsFontForContentSizeCategory) {
-    self.titleLabel.font = [UIFont mdc_preferredFontForMaterialTextStyle:MDCFontTextStyleTitle];
-  } else {
-    self.titleLabel.font = [MDCTypography titleFont];
-  }
   [self.contentScrollView addSubview:self.titleLabel];
 
-  self.messageLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-  self.messageLabel.numberOfLines = 0;
-  self.messageLabel.textAlignment = NSTextAlignmentNatural;
-  if (self.mdc_adjustsFontForContentSizeCategory) {
-    self.messageLabel.font = [UIFont mdc_preferredFontForMaterialTextStyle:MDCFontTextStyleBody1];
-  } else {
-    self.messageLabel.font = [MDCTypography body1Font];
-  }
-  self.messageLabel.textColor = [UIColor colorWithWhite:0.0 alpha:MDCDialogMessageOpacity];
   [self.contentScrollView addSubview:self.messageLabel];
 
   self.titleLabel.text = self.title;

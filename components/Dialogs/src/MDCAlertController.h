@@ -48,6 +48,9 @@
 + (nonnull instancetype)alertControllerWithTitle:(nullable NSString *)title
                                          message:(nullable NSString *)message;
 
+- (nonnull instancetype)initWithTitle:(nullable NSString *)title
+                              message:(nullable NSString *)message;
+
 /** Alert controllers must be created with alertControllerWithTitle:message: */
 - (nonnull instancetype)initWithNibName:(nullable NSString *)nibNameOrNil
                                  bundle:(nullable NSBundle *)nibBundleOrNil NS_UNAVAILABLE;
@@ -88,6 +91,14 @@
 
 /** Descriptive text that summarizes a decision in a sentence of two. */
 @property(nonatomic, nullable, copy) NSString *message;
+
+@property(nonatomic, nonnull, strong, readonly) UILabel *titleLabel;
+
+@property(nonatomic, nonnull, strong, readonly) UILabel *messageLabel;
+
+@property(nonatomic, nullable, strong) NSDictionary<NSString *, id> *attrsForNormal;
+
+@property(nonatomic, nullable, strong) NSDictionary<NSString *, id> *attrsForDisable;
 
 /*
  Indicates whether the alert contents should automatically update their font when the device’s
